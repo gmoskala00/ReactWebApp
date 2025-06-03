@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useActiveProject } from "../store/ActiveProjectContext";
 import { Project } from "../api/ProjectApi";
 
 interface Props {
@@ -8,46 +8,27 @@ interface Props {
 }
 
 const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
+  const { activeProjectId, setActiveProjectId } = useActiveProject();
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    setTitle(event.target.value);
-  };
+  if (activeProjectId) {
+    const selectedProject = projects.find((p) => p.id === activeProjectId);
+    return (
+      <div className="container w-50 mt-4">
+        <div className="card p-4 shadow-sm">
+          <h2>{selectedProject?.title}</h2>
+          <p className="mb-4">{selectedProject?.description}</p>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setActiveProjectId(null)}
+          >
+            Wróć do wszystkich projektów
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const handleTextAreaChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ): void => {
-    setDescription(event.target.value);
-  };
-
-  const handleEditClick = (project: Project) => {
-    setEditingProjectId(project.id);
-    setTitle(project.title);
-    setDescription(project.description);
-  };
-
-  const handleConfirmEdit = () => {
-    if (editingProjectId !== null) {
-      const updatedProject = {
-        id: editingProjectId,
-        title: title,
-        description: description,
-      };
-      handleEdit(updatedProject);
-    } else {
-      alert("Error occured while editing project");
-    }
-    setEditingProjectId(null);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingProjectId(null);
-  };
-
+  // Jeżeli nie ma aktywnego projektu - pokaż listę projektów
   return (
     <div className="container w-50">
       <div className="row fw-bold border-bottom py-2 mx-2">
@@ -62,63 +43,31 @@ const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
               key={project.id}
               className="list-group-item d-flex align-items-center mx-2"
             >
-              {editingProjectId !== project.id ? (
-                <>
-                  <div style={{ flex: 1 }}>{project.title}</div>
-                  <div style={{ flex: 2 }}>{project.description}</div>
-                  <div
-                    style={{ flex: 1 }}
-                    className="d-flex justify-content-evenly"
-                  >
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => {
-                        handleEditClick(project);
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(project.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <input
-                    style={{ flex: 1 }}
-                    value={title}
-                    className="w-75"
-                    onChange={handleInputChange}
-                  />
-                  <textarea
-                    style={{ flex: 2 }}
-                    value={description}
-                    className="mx-2"
-                    onChange={handleTextAreaChange}
-                  />
-                  <div
-                    style={{ flex: 1 }}
-                    className="d-flex justify-content-evenly"
-                  >
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={handleConfirmEdit}
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={handleCancelEdit}
-                    >
-                      Stop Edit
-                    </button>
-                  </div>
-                </>
-              )}
+              <div style={{ flex: 1 }}>{project.title}</div>
+              <div style={{ flex: 2 }}>{project.description}</div>
+              <div
+                style={{ flex: 1 }}
+                className="d-flex justify-content-evenly"
+              >
+                <button
+                  className="btn btn-info mx-1"
+                  onClick={() => setActiveProjectId(project.id)}
+                >
+                  Wybierz
+                </button>
+                <button
+                  className="btn btn-warning mx-1"
+                  onClick={() => handleEdit(project)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-danger mx-1"
+                  onClick={() => handleDelete(project.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>

@@ -1,12 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProjectForm from "./components/ProjectForm";
 import ProjectApi, { Project } from "./api/ProjectApi";
 import ProjectList from "./components/ProjectList";
-import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
+import UserApi from "./api/UserApi";
+import { useActiveProject } from "./store/ActiveProjectContext";
+import StoryApi, { Story } from "./api/StoryApi";
+import StoryList from "./components/StoryList";
+import StoryForm from "./components/StoryForm";
 
 function App() {
   const [projects, setProjects] = useState<Project[]>(ProjectApi.getProjects());
+  const [stories, setStories] = useState<Story[]>([]);
+  const user = UserApi.getCurrentUser();
+  const { activeProjectId } = useActiveProject();
+
+  useEffect(() => {
+    if (activeProjectId) {
+      setStories(StoryApi.getStoriesForProject(activeProjectId));
+    }
+  }, [activeProjectId]);
 
   const handleAddProject = (project: Omit<Project, "id">) => {
     ProjectApi.addProject(project);
@@ -23,14 +36,52 @@ function App() {
     setProjects(ProjectApi.getProjects());
   };
 
+  const handleAddStory = (story: Omit<Story, "id" | "createdAt">) => {
+    StoryApi.addStory(story);
+    setStories(StoryApi.getStoriesForProject(activeProjectId!));
+  };
+
+  const handleDeleteStory = (id: number) => {
+    StoryApi.deleteStory(id);
+    setStories(StoryApi.getStoriesForProject(activeProjectId!));
+  };
+
+  const handleEditStory = (updated: Story) => {
+    StoryApi.updateStory(updated);
+    setStories(StoryApi.getStoriesForProject(activeProjectId!));
+  };
+
   return (
     <div className="vh-100">
-      <ProjectForm handleAddProject={handleAddProject}></ProjectForm>
+      <div className="d-flex justify-content-end p-3">
+        <span>
+          Zalogowany jako:{" "}
+          <strong>
+            {user.firstName} {user.lastName}
+          </strong>
+        </span>
+      </div>
+
+      {!activeProjectId && (
+        <ProjectForm handleAddProject={handleAddProject}></ProjectForm>
+      )}
       <ProjectList
         projects={projects}
         handleDelete={handleDeleteProject}
         handleEdit={handleEditProject}
       ></ProjectList>
+      {activeProjectId && (
+        <div className="d-flex justify-content-center">
+          <div className="d-flex w-75 mt-5 flex-row justify-content-around">
+            <StoryForm handleAddStory={handleAddStory} />
+            <StoryList
+              stories={stories}
+              handleEdit={handleEditStory}
+              handleDelete={handleDeleteStory}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
