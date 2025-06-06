@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Story, StoryState, StoryPriority } from "../api/StoryApi";
 import UserApi from "../api/UserApi";
 import { useActiveProject } from "../store/ActiveProjectContext";
+import { Link } from "react-router-dom";
 
 interface Props {
   stories: Story[];
@@ -171,6 +172,17 @@ export default function StoryList({
                       Usuń
                     </button>
                   </div>
+                  <button
+                    onClick={() => {
+                      console.log("Kliknięto storyId:", story.id);
+                    }}
+                  ></button>
+                  <Link
+                    to={`/historyjka/${story.id}`}
+                    className="btn btn-info btn-sm ms-2"
+                  >
+                    Zadania
+                  </Link>
                 </>
               )}
             </li>
