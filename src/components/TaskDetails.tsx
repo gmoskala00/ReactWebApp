@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { Task, TaskState } from "../api/TaskApi";
-import UserApi from "../api/UserApi";
+import { AuthApi, User } from "../api/AuthApi";
 
 interface TaskDetailsProps {
   task: Task;
@@ -20,7 +21,15 @@ export default function TaskDetails({
   onChangeState,
   onClose,
 }: TaskDetailsProps) {
-  const users = UserApi.getUsers().filter(
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    AuthApi.getUsers()
+      .then(setUsers)
+      .catch(() => setUsers([]));
+  }, []);
+
+  const assignableUsers = users.filter(
     (u) => u.role === "developer" || u.role === "devops"
   );
 
@@ -39,7 +48,9 @@ export default function TaskDetails({
             <b>Osoba:</b>{" "}
             {task.assigneeId
               ? (() => {
-                  const u = users.find((x) => x.id === task.assigneeId);
+                  const u = assignableUsers.find(
+                    (x) => x.id === task.assigneeId
+                  );
                   return u ? u.firstName + " " + u.lastName : "Nieznana osoba";
                 })()
               : "Nieprzypisano"}
@@ -61,7 +72,7 @@ export default function TaskDetails({
               }}
             >
               <option value="">Przypisz osobę</option>
-              {users.map((u) => (
+              {assignableUsers.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.firstName} {u.lastName} ({u.role})
                 </option>

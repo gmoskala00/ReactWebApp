@@ -28,7 +28,6 @@ const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
     );
   }
 
-  // Jeżeli nie ma aktywnego projektu - pokaż listę projektów
   return (
     <div className="container w-50">
       <div className="row fw-bold border-bottom py-2 mx-2">

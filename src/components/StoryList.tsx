@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Story, StoryState, StoryPriority } from "../api/StoryApi";
-import UserApi from "../api/UserApi";
 import { useActiveProject } from "../store/ActiveProjectContext";
 import { Link } from "react-router-dom";
+import { useAuth } from "../store/AuthContext";
 
 interface Props {
   stories: Story[];
@@ -28,7 +28,7 @@ export default function StoryList({
   handleDelete,
 }: Props) {
   const { activeProjectId } = useActiveProject();
-  const user = UserApi.getCurrentUser();
+  const { user } = useAuth();
 
   const [editingStoryId, setEditingStoryId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
@@ -153,7 +153,7 @@ export default function StoryList({
                     <small>
                       Stan: {stateLabels[story.state]}, data:{" "}
                       {story.createdAt.split("T")[0]}, właściciel:{" "}
-                      {user.id === story.ownerId
+                      {user!.id === story.ownerId
                         ? "Ty"
                         : `User ${story.ownerId}`}
                     </small>

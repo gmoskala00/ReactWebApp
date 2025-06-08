@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Story, StoryPriority, StoryState } from "../api/StoryApi";
 import { useActiveProject } from "../store/ActiveProjectContext";
-import UserApi from "../api/UserApi";
+import { useAuth } from "../store/AuthContext";
 
 interface Props {
   handleAddStory: (story: Omit<Story, "id" | "createdAt">) => void;
@@ -14,7 +14,7 @@ const StoryForm = ({ handleAddStory }: Props) => {
   const [state, setState] = useState<StoryState>("todo");
 
   const { activeProjectId } = useActiveProject();
-  const user = UserApi.getCurrentUser();
+  const { user } = useAuth();
 
   if (!activeProjectId) return null;
 
@@ -26,7 +26,7 @@ const StoryForm = ({ handleAddStory }: Props) => {
       priority,
       state,
       projectId: activeProjectId!,
-      ownerId: user.id,
+      ownerId: user!.id,
     });
     setName("");
     setDescription("");
@@ -35,7 +35,7 @@ const StoryForm = ({ handleAddStory }: Props) => {
   }
 
   return (
-    <form onSubmit={onSubmit} className="card p-3 mb-4 w-25 mx-5">
+    <form onSubmit={onSubmit} className="card p-3 mb-4 min mx-5 col-2 w-25">
       <h4>Dodaj nową historyjkę</h4>
       <input
         className="form-control mb-2"
