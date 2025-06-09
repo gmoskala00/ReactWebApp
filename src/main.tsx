@@ -6,13 +6,16 @@ import { ActiveProjectProvider } from "./store/ActiveProjectContext";
 import { BrowserRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
 import { AuthProvider } from "./store/AuthContext";
+import { ThemeProvider } from "./store/ThemeContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <ActiveProjectProvider>
-          <App />
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
         </ActiveProjectProvider>
       </AuthProvider>
     </BrowserRouter>

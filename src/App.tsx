@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage";
 import TasksPage from "./pages/TasksPage";
 import LoginForm from "./components/LoginForm";
 import { useAuth } from "./store/AuthContext";
+import ThemeToggle from "./components/ThemeToggle";
 
 function App() {
   const { user, login, logout } = useAuth();
@@ -14,6 +15,7 @@ function App() {
   return (
     <div>
       <div className="d-flex justify-content-end p-3">
+        <ThemeToggle />
         <span>
           Zalogowany jako:{" "}
           <strong>
