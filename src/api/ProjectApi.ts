@@ -1,43 +1,38 @@
 export interface Project {
-  id: number;
+  _id: string;
   title: string;
   description: string;
 }
 
-export default class ProjectApi {
-  static getProjects(): Project[] {
-    const projects = localStorage.getItem("projects");
-    return projects ? JSON.parse(projects) : [];
-  }
+const API_URL = "http://localhost:4000/api/projects";
 
-  static saveProjects(projects: Project[]) {
-    localStorage.setItem("projects", JSON.stringify(projects));
-  }
+const ProjectApi = {
+  async getProjects(): Promise<Project[]> {
+    const res = await fetch(API_URL);
+    return await res.json();
+  },
 
-  static addProject(project: Omit<Project, "id">) {
-    const projects = this.getProjects();
-    if (project.title && project.description) {
-      projects.push({ id: Date.now(), ...project });
-      this.saveProjects(projects);
-    } else {
-      alert("You must set title and description");
-    }
-    console.log(projects);
-  }
+  async addProject(project: Omit<Project, "_id">): Promise<Project> {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(project),
+    });
+    return await res.json();
+  },
 
-  static updateProject(updatedProject: Project) {
-    const projects = this.getProjects();
-    const updatedProjects = projects.map((project) =>
-      project.id === updatedProject.id ? updatedProject : project
-    );
-    this.saveProjects(updatedProjects);
-  }
+  async updateProject(project: Project): Promise<Project> {
+    const res = await fetch(`${API_URL}/${project._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(project),
+    });
+    return await res.json();
+  },
 
-  static deleteProject(projectId: number) {
-    const projects = this.getProjects();
-    const filteredProjects = projects.filter(
-      (project) => project.id !== projectId
-    );
-    this.saveProjects(filteredProjects);
-  }
-}
+  async deleteProject(id: string): Promise<void> {
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+  },
+};
+
+export default ProjectApi;

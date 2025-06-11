@@ -8,48 +8,55 @@ import StoryList from "../components/StoryList";
 import StoryForm from "../components/StoryForm";
 
 function HomePage() {
-  const [projects, setProjects] = useState<Project[]>(ProjectApi.getProjects());
+  const [projects, setProjects] = useState<Project[]>([]);
   const [stories, setStories] = useState<Story[]>([]);
   const { activeProjectId } = useActiveProject();
 
   useEffect(() => {
+    ProjectApi.getProjects().then(setProjects);
+  }, []);
+
+  useEffect(() => {
     if (activeProjectId) {
-      setStories(StoryApi.getStoriesForProject(activeProjectId));
+      StoryApi.getStoriesForProject(activeProjectId).then(setStories);
     }
   }, [activeProjectId]);
 
-  const handleAddProject = (project: Omit<Project, "id">) => {
-    ProjectApi.addProject(project);
-    setProjects(ProjectApi.getProjects());
+  // --- Projekty
+  const handleAddProject = async (project: Omit<Project, "_id">) => {
+    await ProjectApi.addProject(project);
+    setProjects(await ProjectApi.getProjects());
   };
 
-  const handleDeleteProject = (id: number) => {
-    ProjectApi.deleteProject(id);
-    setProjects(ProjectApi.getProjects());
+  const handleDeleteProject = async (id: string) => {
+    await ProjectApi.deleteProject(id);
+    setProjects(await ProjectApi.getProjects());
   };
 
-  const handleEditProject = (updatedProject: Project) => {
-    ProjectApi.updateProject(updatedProject);
-    setProjects(ProjectApi.getProjects());
+  const handleEditProject = async (updatedProject: Project) => {
+    await ProjectApi.updateProject(updatedProject);
+    setProjects(await ProjectApi.getProjects());
   };
 
-  const handleAddStory = (story: Omit<Story, "id" | "createdAt">) => {
-    StoryApi.addStory(story);
-    setStories(StoryApi.getStoriesForProject(activeProjectId!));
+  // --- Historyjki
+  const handleAddStory = async (story: Omit<Story, "_id" | "createdAt">) => {
+    await StoryApi.addStory(story);
+    setStories(await StoryApi.getStoriesForProject(activeProjectId!));
   };
 
-  const handleDeleteStory = (id: number) => {
-    StoryApi.deleteStory(id);
-    setStories(StoryApi.getStoriesForProject(activeProjectId!));
+  const handleDeleteStory = async (id: string) => {
+    await StoryApi.deleteStory(id);
+    setStories(await StoryApi.getStoriesForProject(activeProjectId!));
   };
 
-  const handleEditStory = (updated: Story) => {
-    StoryApi.updateStory(updated);
-    setStories(StoryApi.getStoriesForProject(activeProjectId!));
+  const handleEditStory = async (updated: Story) => {
+    await StoryApi.updateStory(updated);
+    setStories(await StoryApi.getStoriesForProject(activeProjectId!));
   };
 
   return (
     <div className="vh-100">
+      {/* ...górny panel, np. info o userze */}
       {!activeProjectId && <ProjectForm handleAddProject={handleAddProject} />}
       <ProjectList
         projects={projects}
@@ -58,7 +65,7 @@ function HomePage() {
       />
       {activeProjectId && (
         <div className="d-flex justify-content-center">
-          <div className="d-flex mx-5 mt-5 flex-row justify-content-around">
+          <div className="d-flex w-75 mt-5 flex-row justify-content-around">
             <StoryForm handleAddStory={handleAddStory} />
             <StoryList
               stories={stories}

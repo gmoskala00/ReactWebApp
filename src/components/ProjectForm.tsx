@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Project } from "../api/ProjectApi";
 
 interface Props {
-  handleAddProject: (project: Omit<Project, "id">) => void;
+  handleAddProject: (project: Omit<Project, "_id">) => void;
 }
 
 const ProjectForm = ({ handleAddProject }: Props) => {
@@ -28,7 +28,6 @@ const ProjectForm = ({ handleAddProject }: Props) => {
           handleAddProject({ title: title, description: description });
           setTitle("");
           setDescription("");
-          console.log("TEST");
         }}
       >
         <input

@@ -3,7 +3,7 @@ import { Project } from "../api/ProjectApi";
 
 interface Props {
   projects: Project[];
-  handleDelete: (index: number) => void;
+  handleDelete: (id: string) => void;
   handleEdit: (project: Project) => void;
 }
 
@@ -11,7 +11,7 @@ const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
   const { activeProjectId, setActiveProjectId } = useActiveProject();
 
   if (activeProjectId) {
-    const selectedProject = projects.find((p) => p.id === activeProjectId);
+    const selectedProject = projects.find((p) => p._id === activeProjectId);
     return (
       <div className="container w-50 mt-4">
         <div className="card p-4 shadow-sm">
@@ -39,7 +39,7 @@ const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
         <ul className="list-group">
           {projects.map((project) => (
             <li
-              key={project.id}
+              key={project._id}
               className="list-group-item d-flex align-items-center mx-2"
             >
               <div style={{ flex: 1 }}>{project.title}</div>
@@ -50,7 +50,7 @@ const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
               >
                 <button
                   className="btn btn-info mx-1"
-                  onClick={() => setActiveProjectId(project.id)}
+                  onClick={() => setActiveProjectId(project._id)}
                 >
                   Wybierz
                 </button>
@@ -62,7 +62,7 @@ const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
                 </button>
                 <button
                   className="btn btn-danger mx-1"
-                  onClick={() => handleDelete(project.id)}
+                  onClick={() => handleDelete(project._id)}
                 >
                   Delete
                 </button>

@@ -1,76 +1,44 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import StoryApi, { Story } from "../api/StoryApi";
-import { Task, TaskApi, TaskState } from "../api/TaskApi";
+import TaskApi, { Task, TaskPriority, TaskState } from "../api/TaskApi";
 import KanbanBoard from "../components/KanbanBoard";
 import TaskDetails from "../components/TaskDetails";
+import TaskForm from "../components/TaskForm";
 
 export default function TasksPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const storyId = Number(id);
+  const storyId = id!;
   const [story, setStory] = useState<Story | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
-    const foundStory =
-      StoryApi.getStories().find((s) => s.id === storyId) || null;
-    setStory(foundStory);
-
-    const existing = TaskApi.getTasksForStory(storyId);
-    if (existing.length === 0) {
-      const exampleTasks: Omit<Task, "id" | "createdAt">[] = [
-        {
-          name: "Zaprojektuj formularz",
-          description: "Stwórz formularz dodawania użytkownika",
-          priority: "średni",
-          storyId: storyId,
-          estimateHours: 4,
-          state: "todo",
-        },
-        {
-          name: "Napisz endpoint API",
-          description: "Stwórz endpoint do pobierania listy projektów",
-          priority: "wysoki",
-          storyId: storyId,
-          estimateHours: 6,
-          state: "todo",
-        },
-        {
-          name: "Testuj backend",
-          description: "Dodaj testy jednostkowe dla backendu",
-          priority: "niski",
-          storyId: storyId,
-          estimateHours: 3,
-          state: "doing",
-          assigneeId: 2,
-          startDate: new Date().toISOString(),
-        },
-      ];
-      exampleTasks.forEach((task) => TaskApi.addTask(task));
-    }
-
-    setTasks(TaskApi.getTasksForStory(storyId));
+    StoryApi.getStoryById(storyId).then(setStory);
+    TaskApi.getTasksForStory(storyId).then(setTasks);
   }, [storyId]);
 
-  const handleDeleteTask = (id: number) => {
-    TaskApi.deleteTask(id);
-    setTasks(TaskApi.getTasksForStory(storyId));
+  const handleDeleteTask = async (id: string) => {
+    await TaskApi.deleteTask(id);
+    setTasks(await TaskApi.getTasksForStory(storyId));
   };
 
-  const handleAssign = (task: Task, userId: number) => {
-    const updated = {
+  const handleAssign = async (task: Task, userId: string) => {
+    const updated: Task = {
       ...task,
       assigneeId: userId,
+      state: "doing",
+      startDate: task.startDate || new Date().toISOString(),
     };
-    TaskApi.updateTask(updated);
-    setTasks(TaskApi.getTasksForStory(storyId));
-    setSelectedTask({ ...updated });
+    await TaskApi.updateTask(updated);
+    setTasks(await TaskApi.getTasksForStory(storyId));
+    setSelectedTask(updated);
   };
 
-  const handleChangeState = (task: Task, newState: TaskState) => {
-    const updated = {
+  const handleChangeState = async (task: Task, newState: TaskState) => {
+    const updated: Task = {
       ...task,
       state: newState,
       startDate:
@@ -79,12 +47,23 @@ export default function TasksPage() {
           : task.startDate,
       endDate: newState === "done" ? new Date().toISOString() : undefined,
     };
-    TaskApi.updateTask(updated);
-    setTasks(TaskApi.getTasksForStory(storyId));
+    await TaskApi.updateTask(updated);
+    setTasks(await TaskApi.getTasksForStory(storyId));
     setSelectedTask(updated);
   };
 
   const handleCloseDetails = () => setSelectedTask(null);
+
+  const handleAddTask = async (task: {
+    name: string;
+    description: string;
+    priority: TaskPriority;
+    estimateHours: number;
+  }) => {
+    await TaskApi.addTask({ ...task, storyId, state: "todo" });
+    setTasks(await TaskApi.getTasksForStory(storyId));
+    setShowAddForm(false);
+  };
 
   if (!story) {
     return (
@@ -111,6 +90,18 @@ export default function TasksPage() {
             Zadania historyjki: <b>{story.name}</b>
           </h2>
           <p>{story.description}</p>
+          <button
+            className="btn btn-primary mb-3"
+            onClick={() => setShowAddForm(!showAddForm)}
+          >
+            {showAddForm ? "Anuluj" : "Dodaj zadanie"}
+          </button>
+          {showAddForm && (
+            <TaskForm
+              onSubmit={handleAddTask}
+              onCancel={() => setShowAddForm(false)}
+            />
+          )}
         </>
       )}
       {selectedTask ? (
@@ -120,6 +111,10 @@ export default function TasksPage() {
           onChangeState={handleChangeState}
           onClose={handleCloseDetails}
         />
+      ) : tasks.length === 0 ? (
+        <div className="alert alert-info mt-4">
+          Brak zadań w tej historyjce.
+        </div>
       ) : (
         <KanbanBoard
           tasks={tasks}

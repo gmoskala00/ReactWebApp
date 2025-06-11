@@ -2,52 +2,50 @@ export type StoryPriority = "niski" | "średni" | "wysoki";
 export type StoryState = "todo" | "doing" | "done";
 
 export interface Story {
-  id: number;
+  _id: string;
   name: string;
   description: string;
   priority: StoryPriority;
-  projectId: number;
+  projectId: string;
   createdAt: string;
   state: StoryState;
-  ownerId: number;
+  ownerId: string;
 }
 
-export default class StoryApi {
-  static getStories(): Story[] {
-    const stories = localStorage.getItem("stories");
-    return stories ? JSON.parse(stories) : [];
-  }
+const API_URL = "http://localhost:4000/api/stories";
 
-  static getStoriesForProject(projectId: number): Story[] {
-    return this.getStories().filter((s) => s.projectId === projectId);
-  }
+const StoryApi = {
+  async getStoriesForProject(projectId: string): Promise<Story[]> {
+    const res = await fetch(`${API_URL}?projectId=${projectId}`);
+    return await res.json();
+  },
 
-  static saveStories(stories: Story[]) {
-    localStorage.setItem("stories", JSON.stringify(stories));
-  }
+  async addStory(story: Omit<Story, "_id" | "createdAt">): Promise<Story> {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(story),
+    });
+    return await res.json();
+  },
 
-  static addStory(story: Omit<Story, "id" | "createdAt">) {
-    const stories = this.getStories();
-    const newStory: Story = {
-      ...story,
-      id: Date.now(),
-      createdAt: new Date().toISOString(),
-    };
-    stories.push(newStory);
-    this.saveStories(stories);
-  }
+  async updateStory(story: Story): Promise<Story> {
+    const res = await fetch(`${API_URL}/${story._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(story),
+    });
+    return await res.json();
+  },
 
-  static updateStory(updatedStory: Story) {
-    const stories = this.getStories();
-    const updated = stories.map((s) =>
-      s.id === updatedStory.id ? updatedStory : s
-    );
-    this.saveStories(updated);
-  }
+  async deleteStory(id: string): Promise<void> {
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+  },
 
-  static deleteStory(storyId: number) {
-    const stories = this.getStories();
-    const filtered = stories.filter((s) => s.id !== storyId);
-    this.saveStories(filtered);
-  }
-}
+  getStoryById: async (id: string) => {
+    const res = await fetch(`http://localhost:4000/api/stories/${id}`);
+    return await res.json();
+  },
+};
+
+export default StoryApi;

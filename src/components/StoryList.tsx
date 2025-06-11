@@ -7,7 +7,7 @@ import { useAuth } from "../store/AuthContext";
 interface Props {
   stories: Story[];
   handleEdit: (story: Story) => void;
-  handleDelete: (id: number) => void;
+  handleDelete: (id: string) => Promise<void>;
 }
 
 const stateLabels: Record<StoryState, string> = {
@@ -30,7 +30,7 @@ export default function StoryList({
   const { activeProjectId } = useActiveProject();
   const { user } = useAuth();
 
-  const [editingStoryId, setEditingStoryId] = useState<number | null>(null);
+  const [editingStoryId, setEditingStoryId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPriority, setEditPriority] = useState<StoryPriority>("średni");
@@ -43,7 +43,7 @@ export default function StoryList({
       : stories.filter((story: Story) => story.state === filter);
 
   const handleEditClick = (story: Story) => {
-    setEditingStoryId(story.id);
+    setEditingStoryId(story._id);
     setEditName(story.name);
     setEditDescription(story.description);
     setEditPriority(story.priority);
@@ -90,10 +90,10 @@ export default function StoryList({
         ) : (
           filteredStories.map((story: Story) => (
             <li
-              key={story.id}
+              key={story._id}
               className="list-group-item d-flex justify-content-between align-items-center"
             >
-              {editingStoryId === story.id ? (
+              {editingStoryId === story._id ? (
                 <>
                   <div className="w-100">
                     <input
@@ -153,7 +153,7 @@ export default function StoryList({
                     <small>
                       Stan: {stateLabels[story.state]}, data:{" "}
                       {story.createdAt.split("T")[0]}, właściciel:{" "}
-                      {user!.id === story.ownerId
+                      {user!._id === story.ownerId
                         ? "Ty"
                         : `User ${story.ownerId}`}
                     </small>
@@ -167,22 +167,17 @@ export default function StoryList({
                     </button>
                     <button
                       className="btn btn-danger btn-sm"
-                      onClick={() => handleDelete(story.id)}
+                      onClick={() => handleDelete(story._id)}
                     >
                       Usuń
                     </button>
+                    <Link
+                      to={`/historyjka/${story._id}`}
+                      className="btn btn-info btn-sm ms-2"
+                    >
+                      Zadania
+                    </Link>
                   </div>
-                  <button
-                    onClick={() => {
-                      console.log("Kliknięto storyId:", story.id);
-                    }}
-                  ></button>
-                  <Link
-                    to={`/historyjka/${story.id}`}
-                    className="btn btn-info btn-sm ms-2"
-                  >
-                    Zadania
-                  </Link>
                 </>
               )}
             </li>

@@ -2,7 +2,7 @@ import { Task, TaskState } from "../api/TaskApi";
 
 interface Props {
   tasks: Task[];
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => Promise<void>;
   onTaskClick: React.Dispatch<React.SetStateAction<Task | null>>;
 }
 
@@ -28,7 +28,7 @@ export default function KanbanBoard({ tasks, onDelete, onTaskClick }: Props) {
               .filter((t) => t.state === col)
               .map((task) => (
                 <li
-                  key={task.id}
+                  key={task._id}
                   className="list-group-item border border-secondary rounded task-list-item py-3 my-2"
                   onClick={() => onTaskClick && onTaskClick(task)}
                   style={{ cursor: "pointer" }}

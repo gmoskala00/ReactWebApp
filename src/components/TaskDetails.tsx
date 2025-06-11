@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Task, TaskState } from "../api/TaskApi";
 import { AuthApi, User } from "../api/AuthApi";
+import StoryApi, { Story } from "../api/StoryApi";
 
 interface TaskDetailsProps {
   task: Task;
-  onAssign: (task: Task, userId: number) => void;
+  onAssign: (task: Task, userId: string) => void;
   onChangeState: (task: Task, newState: TaskState) => void;
   onClose: () => void;
 }
@@ -22,12 +23,19 @@ export default function TaskDetails({
   onClose,
 }: TaskDetailsProps) {
   const [users, setUsers] = useState<User[]>([]);
+  const [story, setStory] = useState<Story | null>(null);
 
   useEffect(() => {
     AuthApi.getUsers()
       .then(setUsers)
       .catch(() => setUsers([]));
   }, []);
+
+  useEffect(() => {
+    StoryApi.getStoryById(task.storyId)
+      .then(setStory)
+      .catch(() => setStory(null));
+  }, [task.storyId]);
 
   const assignableUsers = users.filter(
     (u) => u.role === "developer" || u.role === "devops"
@@ -39,6 +47,12 @@ export default function TaskDetails({
         <div className="modal-content p-4">
           <h4>{task.name}</h4>
           <p>{task.description}</p>
+          {story && (
+            <div>
+              <b>Historyjka:</b> {story.name}
+              <br />
+            </div>
+          )}
           <div>
             <b>Priorytet:</b> {task.priority}
             <br />
@@ -49,9 +63,9 @@ export default function TaskDetails({
             {task.assigneeId
               ? (() => {
                   const u = assignableUsers.find(
-                    (x) => x.id === task.assigneeId
+                    (x) => x._id === task.assigneeId
                   );
-                  return u ? u.firstName + " " + u.lastName : "Nieznana osoba";
+                  return u ? `${u.firstName} ${u.lastName}` : "Nieznana osoba";
                 })()
               : "Nieprzypisano"}
             <br />
@@ -60,6 +74,9 @@ export default function TaskDetails({
             <br />
             <b>Data zakończenia:</b>{" "}
             {task.endDate ? new Date(task.endDate).toLocaleString() : "-"}
+            <br />
+            <b>Zrealizowane roboczogodziny:</b>{" "}
+            {task.actualHours !== undefined ? task.actualHours : "-"}
           </div>
           <hr />
           <div className="d-flex gap-2">
@@ -67,13 +84,15 @@ export default function TaskDetails({
               className="form-select"
               value={task.assigneeId ?? ""}
               onChange={(e) => {
-                const userId = Number(e.target.value);
-                onAssign(task, userId);
+                const userId = e.target.value;
+                if (userId) {
+                  onAssign(task, userId);
+                }
               }}
             >
               <option value="">Przypisz osobę</option>
               {assignableUsers.map((u) => (
-                <option key={u.id} value={u.id}>
+                <option key={u._id} value={u._id}>
                   {u.firstName} {u.lastName} ({u.role})
                 </option>
               ))}
@@ -82,7 +101,10 @@ export default function TaskDetails({
             <select
               className="form-select"
               value={task.state}
-              onChange={(e) => onChangeState(task, e.target.value as TaskState)}
+              onChange={(e) => {
+                const newState = e.target.value as TaskState;
+                onChangeState(task, newState);
+              }}
             >
               <option value="todo">Do zrobienia</option>
               <option value="doing">W trakcie</option>

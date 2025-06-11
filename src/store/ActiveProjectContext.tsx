@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState } from "react";
 
 interface ActiveProjectContextType {
-  activeProjectId: number | null;
-  setActiveProjectId: (id: number | null) => void;
+  activeProjectId: string | null;
+  setActiveProjectId: (id: string | null) => void;
 }
 
 const ActiveProjectContext = createContext<
@@ -12,17 +12,17 @@ const ActiveProjectContext = createContext<
 export const ActiveProjectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [activeProjectId, setActiveProjectId] = useState<number | null>(() => {
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(() => {
     const id = localStorage.getItem("activeProject");
-    return id ? Number(id) : null;
+    return id ? id : null;
   });
 
-  const handleSetActiveProjectId = (id: number | null) => {
+  const handleSetActiveProjectId = (id: string | null) => {
     setActiveProjectId(id);
     if (id === null) {
       localStorage.removeItem("activeProject");
     } else {
-      localStorage.setItem("activeProject", id.toString());
+      localStorage.setItem("activeProject", id);
     }
   };
 

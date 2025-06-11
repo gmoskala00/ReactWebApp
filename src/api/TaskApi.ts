@@ -2,57 +2,49 @@ export type TaskPriority = "niski" | "średni" | "wysoki";
 export type TaskState = "todo" | "doing" | "done";
 
 export interface Task {
-  id: number;
+  _id: string;
   name: string;
   description: string;
   priority: TaskPriority;
-  storyId: number;
+  storyId: string;
   estimateHours: number;
   state: TaskState;
   createdAt: string;
   startDate?: string;
   endDate?: string;
-  assigneeId?: number;
+  assigneeId?: string;
   actualHours?: number;
 }
 
-export const TaskApi = {
-  getTasks(): Task[] {
-    const tasks = localStorage.getItem("tasks");
-    return tasks ? JSON.parse(tasks) : [];
+const API_URL = "http://localhost:4000/api/tasks";
+
+const TaskApi = {
+  async getTasksForStory(storyId: string): Promise<Task[]> {
+    const res = await fetch(`${API_URL}?storyId=${storyId}`);
+    return await res.json();
   },
 
-  getTasksForStory(storyId: number): Task[] {
-    return TaskApi.getTasks().filter((t) => t.storyId === storyId);
+  async addTask(task: Omit<Task, "_id" | "createdAt">): Promise<Task> {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(task),
+    });
+    return await res.json();
   },
 
-  saveTasks(tasks: Task[]): void {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
+  async updateTask(task: Task): Promise<Task> {
+    const res = await fetch(`${API_URL}/${task._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(task),
+    });
+    return await res.json();
   },
 
-  addTask(task: Omit<Task, "id" | "createdAt">): void {
-    const tasks = TaskApi.getTasks();
-    const maxId = tasks.reduce((max, t) => (t.id > max ? t.id : max), 0);
-    const newTask: Task = {
-      ...task,
-      id: maxId + 1,
-      createdAt: new Date().toISOString(),
-      state: "todo",
-    };
-    tasks.push(newTask);
-    TaskApi.saveTasks(tasks);
-  },
-
-  updateTask(updatedTask: Task) {
-    const tasks = TaskApi.getTasks();
-    const updated = tasks.map((t) =>
-      t.id === updatedTask.id ? updatedTask : t
-    );
-    TaskApi.saveTasks(updated);
-  },
-
-  deleteTask(taskId: number): void {
-    const tasks = TaskApi.getTasks();
-    TaskApi.saveTasks(tasks.filter((t) => t.id !== taskId));
+  async deleteTask(id: string): Promise<void> {
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
   },
 };
+
+export default TaskApi;
