@@ -42,7 +42,7 @@ function generateTokens(user) {
 
 app.post('/api/login', async (req, res) => {
     const { login, password } = req.body;
-    const user = await User.findOne({ login, password }); // Uwaga: w prod hashowane hasła!
+    const user = await User.findOne({ login, password });
     if (!user) return res.status(401).json({ error: "Zły login lub hasło" });
     const payload = { id: user._id, login: user.login, role: user.role };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
@@ -97,7 +97,13 @@ app.post('/api/projects', async (req, res) => {
 });
 
 app.delete('/api/projects/:id', async (req, res) => {
-    await Project.findByIdAndDelete(req.params.id);
+    const projectId = req.params.id;
+    const stories = await Story.find({ projectId });
+    const storyIds = stories.map(s => s._id);
+    await Task.deleteMany({ storyId: { $in: storyIds } });
+    await Story.deleteMany({ projectId });
+    await Project.findByIdAndDelete(projectId);
+
     res.json({ ok: true });
 });
 
@@ -129,7 +135,10 @@ app.post('/api/stories', async (req, res) => {
 });
 
 app.delete('/api/stories/:id', async (req, res) => {
-    await Story.findByIdAndDelete(req.params.id);
+    const storyId = req.params.id;
+    await Task.deleteMany({ storyId });
+    await Story.findByIdAndDelete(storyId);
+
     res.json({ ok: true });
 });
 

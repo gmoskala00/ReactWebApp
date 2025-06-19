@@ -52,9 +52,9 @@ const ProjectList = ({ projects, handleDelete, handleEdit }: Props) => {
   return (
     <div className="container w-75">
       <div className="row fw-bold border-bottom py-2 mx-2">
-        <p className="col-3">Title</p>
-        <p className="col-6">Description</p>
-        <p className="col-3">Actions</p>
+        <p className="col-3">Tytuł</p>
+        <p className="col-6">Opis</p>
+        <p className="col-3">Akcje</p>
       </div>
       {projects.length > 0 ? (
         <ul className="list-group">

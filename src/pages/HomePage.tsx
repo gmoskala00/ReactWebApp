@@ -38,6 +38,7 @@ function HomePage() {
     setProjects(await ProjectApi.getProjects());
   };
 
+  // --- Stories
   const handleAddStory = async (story: Omit<Story, "_id" | "createdAt">) => {
     await StoryApi.addStory(story);
     setStories(await StoryApi.getStoriesForProject(activeProjectId!));
