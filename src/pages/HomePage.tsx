@@ -38,7 +38,6 @@ function HomePage() {
     setProjects(await ProjectApi.getProjects());
   };
 
-  // --- Historyjki
   const handleAddStory = async (story: Omit<Story, "_id" | "createdAt">) => {
     await StoryApi.addStory(story);
     setStories(await StoryApi.getStoriesForProject(activeProjectId!));
@@ -56,7 +55,6 @@ function HomePage() {
 
   return (
     <div className="vh-100">
-      {/* ...górny panel, np. info o userze */}
       {!activeProjectId && <ProjectForm handleAddProject={handleAddProject} />}
       <ProjectList
         projects={projects}

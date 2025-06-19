@@ -9,7 +9,7 @@ const TaskSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
     startDate: Date,
     endDate: Date,
-    assigneeId: Number,
+    assigneeId: String,
     actualHours: Number,
 });
 module.exports = mongoose.model("Task", TaskSchema);

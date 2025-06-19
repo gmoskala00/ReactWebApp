@@ -4,7 +4,7 @@ import { useActiveProject } from "../store/ActiveProjectContext";
 import { useAuth } from "../store/AuthContext";
 
 interface Props {
-  handleAddStory: (story: Omit<Story, "id" | "createdAt">) => void;
+  handleAddStory: (story: Omit<Story, "_id" | "createdAt">) => void;
 }
 
 const StoryForm = ({ handleAddStory }: Props) => {
@@ -26,7 +26,7 @@ const StoryForm = ({ handleAddStory }: Props) => {
       priority,
       state,
       projectId: activeProjectId!,
-      ownerId: user!.id,
+      ownerId: user!._id,
     });
     setName("");
     setDescription("");
@@ -69,7 +69,7 @@ const StoryForm = ({ handleAddStory }: Props) => {
         <option value="doing">W trakcie</option>
         <option value="done">Zrobione</option>
       </select>
-      <button type="submit" className="btn btn-success">
+      <button type="submit" className="btn btn-success" data-testid="story-add">
         Dodaj
       </button>
     </form>

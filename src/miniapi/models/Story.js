@@ -6,6 +6,6 @@ const StorySchema = new mongoose.Schema({
     projectId: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
     createdAt: { type: Date, default: Date.now },
     state: String,
-    ownerId: Number,
+    ownerId: String,
 });
 module.exports = mongoose.model("Story", StorySchema);

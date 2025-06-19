@@ -101,6 +101,20 @@ app.delete('/api/projects/:id', async (req, res) => {
     res.json({ ok: true });
 });
 
+app.put('/api/projects/:id', async (req, res) => {
+    try {
+        const project = await Project.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        if (!project) return res.status(404).json({ error: "Projekt nie znaleziony" });
+        res.json(project);
+    } catch (err) {
+        res.status(500).json({ error: "Błąd serwera" });
+    }
+});
+
 // --- STORY ENDPOINTY ---
 app.get('/api/stories', async (req, res) => {
     const { projectId } = req.query;

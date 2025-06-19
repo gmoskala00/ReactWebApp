@@ -20,9 +20,11 @@ export default function TasksPage() {
     TaskApi.getTasksForStory(storyId).then(setTasks);
   }, [storyId]);
 
-  const handleDeleteTask = async (id: string) => {
-    await TaskApi.deleteTask(id);
+  const handleDeleteTask = async () => {
+    if (!selectedTask) return;
+    await TaskApi.deleteTask(selectedTask._id);
     setTasks(await TaskApi.getTasksForStory(storyId));
+    setSelectedTask(null);
   };
 
   const handleAssign = async (task: Task, userId: string) => {
@@ -63,6 +65,12 @@ export default function TasksPage() {
     await TaskApi.addTask({ ...task, storyId, state: "todo" });
     setTasks(await TaskApi.getTasksForStory(storyId));
     setShowAddForm(false);
+  };
+
+  const handleEditTask = async (updatedTask: Task) => {
+    await TaskApi.updateTask(updatedTask);
+    setTasks(await TaskApi.getTasksForStory(storyId));
+    setSelectedTask(updatedTask);
   };
 
   if (!story) {
@@ -109,6 +117,8 @@ export default function TasksPage() {
           task={selectedTask}
           onAssign={handleAssign}
           onChangeState={handleChangeState}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
           onClose={handleCloseDetails}
         />
       ) : tasks.length === 0 ? (
@@ -116,11 +126,7 @@ export default function TasksPage() {
           Brak zadań w tej historyjce.
         </div>
       ) : (
-        <KanbanBoard
-          tasks={tasks}
-          onDelete={handleDeleteTask}
-          onTaskClick={setSelectedTask}
-        />
+        <KanbanBoard tasks={tasks} onTaskClick={setSelectedTask} />
       )}
     </div>
   );

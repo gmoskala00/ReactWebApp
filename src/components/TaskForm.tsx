@@ -36,6 +36,7 @@ export default function TaskForm({ onSubmit, onCancel }: TaskFormProps) {
           className="form-control"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          data-testid="task-name"
           required
         />
       </div>
@@ -45,6 +46,7 @@ export default function TaskForm({ onSubmit, onCancel }: TaskFormProps) {
           className="form-control"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          data-testid="task-description"
           required
         />
       </div>

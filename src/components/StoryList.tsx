@@ -100,11 +100,13 @@ export default function StoryList({
                       className="form-control mb-2"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
+                      data-testid="story-edit-name"
                     />
                     <textarea
                       className="form-control mb-2"
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
+                      data-testid="story-edit-description"
                     />
                     <select
                       className="form-select mb-2"

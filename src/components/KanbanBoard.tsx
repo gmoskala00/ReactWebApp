@@ -2,7 +2,6 @@ import { Task, TaskState } from "../api/TaskApi";
 
 interface Props {
   tasks: Task[];
-  onDelete: (id: string) => Promise<void>;
   onTaskClick: React.Dispatch<React.SetStateAction<Task | null>>;
 }
 
@@ -12,7 +11,7 @@ const stateLabels: Record<TaskState, string> = {
   done: "Zrobione",
 };
 
-export default function KanbanBoard({ tasks, onDelete, onTaskClick }: Props) {
+export default function KanbanBoard({ tasks, onTaskClick }: Props) {
   const columns: TaskState[] = ["todo", "doing", "done"];
 
   return (
