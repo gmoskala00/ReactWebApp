@@ -5,13 +5,15 @@ interface ActiveProjectContextType {
   setActiveProjectId: (id: string | null) => void;
 }
 
+interface Props {
+  children: React.ReactNode;
+}
+
 const ActiveProjectContext = createContext<
   ActiveProjectContextType | undefined
 >(undefined);
 
-export const ActiveProjectProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ActiveProjectProvider = ({ children }: Props) => {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(() => {
     const id = localStorage.getItem("activeProject");
     return id ? id : null;

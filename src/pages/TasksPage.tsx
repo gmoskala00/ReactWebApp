@@ -40,7 +40,7 @@ export default function TasksPage() {
   };
 
   const handleChangeState = async (task: Task, newState: TaskState) => {
-    const updated: Task = {
+    let updated: Task = {
       ...task,
       state: newState,
       startDate:
@@ -49,6 +49,16 @@ export default function TasksPage() {
           : task.startDate,
       endDate: newState === "done" ? new Date().toISOString() : undefined,
     };
+    if (newState === "done" && updated.startDate && updated.endDate) {
+      const start = new Date(updated.startDate).getTime();
+      const end = new Date(updated.endDate).getTime();
+      const diffInHours = Math.max(0, (end - start) / (1000 * 60 * 60));
+      updated = {
+        ...updated,
+        actualHours: Number(diffInHours.toFixed(2)),
+      };
+    }
+
     await TaskApi.updateTask(updated);
     setTasks(await TaskApi.getTasksForStory(storyId));
     setSelectedTask(updated);

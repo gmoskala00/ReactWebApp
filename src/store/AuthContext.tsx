@@ -28,27 +28,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (token) {
-      AuthApi.getMe(token)
-        .then(setUser)
-        .catch(() => {
-          setUser(null);
-          setToken(null);
-          setRefreshToken(null);
-          localStorage.removeItem("token");
-          localStorage.removeItem("refreshToken");
-        });
-    } else {
-      setUser(null);
+      fetchUser(token).catch(logout);
     }
   }, [token]);
 
+  const fetchUser = async (accessToken: string) => {
+    try {
+      const user = await AuthApi.getMe(accessToken);
+      setUser(user);
+    } catch {
+      if (refreshToken) {
+        try {
+          const newTokens = await AuthApi.refresh(refreshToken);
+          setToken(newTokens.token);
+          setRefreshToken(newTokens.refreshToken);
+          localStorage.setItem("token", newTokens.token);
+          localStorage.setItem("refreshToken", newTokens.refreshToken);
+          const user = await AuthApi.getMe(newTokens.token);
+          setUser(user);
+        } catch {
+          logout();
+        }
+      } else {
+        logout();
+      }
+    }
+  };
+
   const login = async (login: string, password: string) => {
-    const { token, refreshToken } = await AuthApi.login(login, password);
-    setToken(token);
-    setRefreshToken(refreshToken);
-    localStorage.setItem("token", token);
-    localStorage.setItem("refreshToken", refreshToken);
-    const user = await AuthApi.getMe(token);
+    const tokens = await AuthApi.login(login, password);
+    setToken(tokens.token);
+    setRefreshToken(tokens.refreshToken);
+    localStorage.setItem("token", tokens.token);
+    localStorage.setItem("refreshToken", tokens.refreshToken);
+    const user = await AuthApi.getMe(tokens.token);
     setUser(user);
   };
 

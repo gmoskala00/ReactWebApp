@@ -43,7 +43,7 @@ export const AuthApi = {
   },
 
   async getUsers(): Promise<User[]> {
-    const res = await fetch("http://localhost:4000/api/users");
+    const res = await fetch(`${API_URL}/users`);
     if (!res.ok) throw new Error("Błąd pobierania listy użytkowników");
     return await res.json();
   },

@@ -51,6 +51,7 @@ const StoryForm = ({ handleAddStory }: Props) => {
         onChange={(e) => setDescription(e.target.value)}
         required
       />
+      <p className="my-0">Priorytet</p>
       <select
         className="form-select mb-2"
         value={priority}
@@ -60,6 +61,7 @@ const StoryForm = ({ handleAddStory }: Props) => {
         <option value="średni">Średni</option>
         <option value="wysoki">Wysoki</option>
       </select>
+      <p className="my-0">Status</p>
       <select
         className="form-select mb-2"
         value={state}
